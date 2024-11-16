@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script>
+      // Track mouse position
+      let mouse = { x: 0, y: 0 };
+      window.addEventListener('mousemove', (event) => {
+        const rect = document.body.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      });
+      // Component for spheres to follow and orbit around the mouse
+      AFRAME.registerComponent('follow-mouse', {
+        schema: {
+          index: {type: 'number', default: 0}
+        },
+        init: function() {
+          // Initial positions and velocities
+          this.positions = [
+            {x: 0, y: 1.25, z: -7},
+            {x: -2, y: 2.25, z: -7},
+            {x: 2, y: 3.25, z: -7}
+          ];
+          
+          this.velocities = [
+            {x: 0, y: 0, z: 0},
+            {x: 0, y: 0, z: 0},
+            {x: 0, y: 0, z: 0}
+          ];
+          this.orbitRadius = 1.5 + this.data.index * 0.5;
+          this.orbitSpeed = 0.005 + this.data.index * 0.002;
+          this.angle = 0;
+        },
+        tick: function(time, deltaTime) {
+          const dt = deltaTime / 1000;
+          // Update angle for orbiting
+          this.angle += this.orbitSpeed * dt;
+          // Calculate target position around mouse
+          const targetX = mouse.x + this.orbitRadius * Math.cos(this.angle);
+          const targetY = mouse.y + this.orbitRadius * Math.sin(this.angle);
+          // Smoothly move towards target position
+          this.el.object3D.position.x += (targetX - this.el.object3D.position.x) * 0.1;
+          this.el.object3D.position.y += (targetY - this.el.object3D.position.y) * 0.1;
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <a-scene>
+      <a-assets>
+        <img id="sky" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/ISS-40_Thunderheads_near_Borneo.jpg/1920px-ISS-40_Thunderheads_near_Borneo.jpg">
+      </a-assets>
+      
+      <a-sphere position="0 1.25 -7" radius="1.25" color="#EF2D5E"
+                follow-mouse="index: 0"
+                animation__color="property: material.color; type: color; from: #EF2D5E; to: #4CC3D9; dur: 3000; dir: alternate; loop: true"></a-sphere>
+      <a-sphere position="-2 2.25 -7" radius="1.45" color="#EF2D5E"
+                follow-mouse="index: 1"
+                animation__color="property: material.color; type: color; from: #EF2D5E; to: #FFC65D; dur: 4000; dir: alternate; loop: true"></a-sphere>
+      <a-sphere position="2 3.25 -7" radius="1.25" color="#EF2D5E"
+                follow-mouse="index: 2"
+                animation__color="property: material.color; type: color; from: #EF2D5E; to: #7BC8A4; dur: 5000; dir: alternate; loop: true"></a-sphere>
+      <a-sky src="#sky"></a-sky>
+    </a-scene>
+  </body>
+</html>

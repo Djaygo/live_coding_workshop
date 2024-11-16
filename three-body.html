@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script>
+      // Track mouse position
+      let mouse = { x: 0, y: 0 };
+      window.addEventListener('mousemove', (event) => {
+        const rect = document.body.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      });
+
+      // Three-body simulation component
+      AFRAME.registerComponent('three-body', {
+        schema: {
+          index: {type: 'number', default: 0}
+        },
+
+        init: function() {
+          // Initial positions and velocities
+          this.positions = [
+            {x: 0, y: 1.25, z: -7},
+            {x: -2, y: 2.25, z: -7},
+            {x: 2, y: 3.25, z: -7}
+          ];
+          
+          this.velocities = [
+            {x: 0.005, y: 0.0025, z: 0},
+            {x: -0.0025, y: 0.005, z: 0},
+            {x: 0.0025, y: -0.005, z: 0}
+          ];
+
+          this.masses = [1, 1, 1];
+          this.G = 0.00001; // Gravitational constant
+          
+          this.position = this.positions[this.data.index];
+          this.velocity = this.velocities[this.data.index];
+        },
+
+        tick: function(time, deltaTime) {
+          // Get all three-body elements
+          const bodies = document.querySelectorAll('[three-body]');
+          const positions = Array.from(bodies).map(body => body.object3D.position);
+          
+          // Calculate gravitational forces
+          let totalForceX = 0;
+          let totalForceY = 0;
+          let totalForceZ = 0;
+          
+          for (let i = 0; i < positions.length; i++) {
+            if (i !== this.data.index) {
+              const dx = positions[i].x - this.el.object3D.position.x;
+              const dy = positions[i].y - this.el.object3D.position.y;
+              const dz = positions[i].z - this.el.object3D.position.z;
+              
+              const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+              const force = this.G * this.masses[i] * this.masses[this.data.index] / (distance * distance);
+              
+              totalForceX += force * dx / distance;
+              totalForceY += force * dy / distance;
+              totalForceZ += force * dz / distance;
+            }
+          }
+          
+          // Add mouse attraction
+          const mouseForceX = this.G * (mouse.x - this.el.object3D.position.x);
+          const mouseForceY = this.G * (mouse.y - this.el.object3D.position.y);
+          totalForceX += mouseForceX;
+          totalForceY += mouseForceY;
+          
+          // Update velocity and position
+          const dt = deltaTime / 1000; // Convert to seconds
+          
+          this.velocity.x += totalForceX * dt;
+          this.velocity.y += totalForceY * dt;
+          this.velocity.z += totalForceZ * dt;
+          
+          this.el.object3D.position.x += this.velocity.x * dt;
+          this.el.object3D.position.y += this.velocity.y * dt;
+          this.el.object3D.position.z += this.velocity.z * dt;
+          
+          // Keep bodies within visible range
+          const bound = 20;
+          if (Math.abs(this.el.object3D.position.x) > bound || 
+              Math.abs(this.el.object3D.position.y) > bound || 
+              Math.abs(this.el.object3D.position.z) > -3) {
+            this.el.object3D.position.set(
+              this.positions[this.data.index].x,
+              this.positions[this.data.index].y,
+              this.positions[this.data.index].z
+            );
+            this.velocity = this.velocities[this.data.index];
+          }
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <a-scene>
+      <a-assets>
+        <img id="sky" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/ISS-40_Thunderheads_near_Borneo.jpg/1920px-ISS-40_Thunderheads_near_Borneo.jpg">
+      </a-assets>
+      
+      <a-sphere position="0 1.25 -7" radius="1.25" color="#EF2D5E"
+                three-body="index: 0"
+                animation__color="property: material.color; type: color; from: #EF2D5E; to: #4CC3D9; dur: 3000; dir: alternate; loop: true"></a-sphere>
+      <a-sphere position="-2 2.25 -7" radius="1.45" color="#EF2D5E"
+                three-body="index: 1"
+                animation__color="property: material.color; type: color; from: #EF2D5E; to: #FFC65D; dur: 4000; dir: alternate; loop: true"></a-sphere>
+      <a-sphere position="2 3.25 -7" radius="1.25" color="#EF2D5E"
+                three-body="index: 2"
+                animation__color="property: material.color; type: color; from: #EF2D5E; to: #7BC8A4; dur: 5000; dir: alternate; loop: true"></a-sphere>
+
+      <a-sky src="#sky"></a-sky>
+    </a-scene>
+  </body>
+</html>
