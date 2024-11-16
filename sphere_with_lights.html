@@ -5,11 +5,15 @@
   <body>
     <a-scene>
       
-        <a-sphere position="0 0 -5" radius="1.25" color="#EF2D5E" </a-sphere>
-        <a-light type="point" color="#FFC65D" position="2 2 0" intensity="2"></a-light>
-        <a-light type="point" color="#7BC8A4" position="-2 2 0" intensity="2"></a-light>
-        <a-light type="point" color="#4CC3D9" position="0 2 0" intensity="2"></a-light>
-
+        <a-sphere position="0 0 -5" radius="1.25" color="#EF2D5E" 
+            <a-light type="point" color="#FFC65D" position="1 1 1" intensity="2" ></a-light>
+            <!-- animation="property: position; to: -2 -2.25 -7; dir: alternate; dur: 2500; loop: true; easing: easeInOutSine"; -->
+            <a-light type="point" color="#7BC8A4" position="1 0 0" intensity="2"></a-light>
+            <!-- animation="property: position; to: 2 2.25 7; dir: alternate; dur: 3500; loop: true; easing: easeInOutSine"; -->
+            <a-light type="point" color="#4CC3D9" position="0 1 1" intensity="2"></a-light>
+            <!-- animation="property: position; to: -2 -2.25 0; dir: alternate; dur: 5500; loop: true; easing: easeInOutSine"; -->
+        </a-sphere>
+        
         <!-- <a-plane src="#sky"></a-plane> -->
      
     </a-scene>

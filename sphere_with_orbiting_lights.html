@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script>
+      AFRAME.registerComponent('orbit', {
+        schema: {
+          speed: {type: 'number', default: 1},
+          radius: {type: 'number', default: 2},
+          axis: {type: 'string', default: 'y'}
+        },
+
+        init: function() {
+          this.angle = 0;
+          const pos = this.el.getAttribute('position');
+          this.centerX = pos.x;
+          this.centerY = pos.y;
+          this.centerZ = pos.z;
+        },
+
+        tick: function(time, deltaTime) {
+          this.angle += this.data.speed * (deltaTime / 1000);
+          
+          let x = this.centerX;
+          let y = this.centerY;
+          let z = this.centerZ;
+          
+          if (this.data.axis === 'y') {
+            x = this.centerX + this.data.radius * Math.cos(this.angle);
+            z = this.centerZ + this.data.radius * Math.sin(this.angle);
+          } else if (this.data.axis === 'x') {
+            y = this.centerY + this.data.radius * Math.cos(this.angle);
+            z = this.centerZ + this.data.radius * Math.sin(this.angle);
+          } else if (this.data.axis === 'z') {
+            x = this.centerX + this.data.radius * Math.cos(this.angle);
+            y = this.centerY + this.data.radius * Math.sin(this.angle);
+          }
+          
+          this.el.setAttribute('position', {x: x, y: y, z: z});
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <a-scene>
+      
+        <a-sphere position="0 0 -7" radius="1.25" color="#EF2D5E"></a-sphere>
+        
+        <a-light type="point" color="#FFC65D" position="2 0 -5" intensity="2"
+                orbit="speed: 1; radius: 2; axis: y"></a-light>
+        <a-light type="point" color="#7BC8A4" position="0 2 -5" intensity="2"
+                orbit="speed: 0.8; radius: 2; axis: x"></a-light>
+        <a-light type="point" color="#4CC3D9" position="0 0 -3" intensity="2"
+                orbit="speed: 1.2; radius: 2; axis: z"></a-light>
+        
+        <!-- <a-plane src="#sky"></a-plane> -->
+     
+    </a-scene>
+  </body>
+</html>
